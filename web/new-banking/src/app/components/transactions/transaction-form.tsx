@@ -7,6 +7,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 
@@ -78,7 +85,15 @@ export default function TransactionForm() {
           <FormItem>
             <FormLabel className='text-2'>Type</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <SelectTrigger>
+                  <SelectValue placeholder='Type' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='deposit'>Deposit</SelectItem>
+                  <SelectItem value='withdrawal'>Withdrawal</SelectItem>
+                </SelectContent>
+              </Select>
             </FormControl>
             <FormDescription></FormDescription>
             <FormMessage />

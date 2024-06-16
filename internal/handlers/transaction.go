@@ -97,9 +97,6 @@ func HandleCreateTransaction(w http.ResponseWriter, r *http.Request) {
 
 	case "deposit":
 
-		// if err := getBalance(data, balance); err != nil {
-		// 	return errors.New("unable to retrieve balance")
-		// }
 		transaction.Balance = balance + transaction.Amount
 
 		log.Printf("user id: %v, name: %v, amount: %v", transaction.UserID, transaction.Name, transaction.Amount)
@@ -111,10 +108,6 @@ func HandleCreateTransaction(w http.ResponseWriter, r *http.Request) {
 				Message: "not enough funds",
 			}
 		}
-
-		// if err := getBalance(data, balance); err != nil {
-		// 	return errors.New("unable to retrieve balance")
-		// }
 
 		transaction.Balance = balance - transaction.Amount
 		transaction.Amount = -transaction.Amount
