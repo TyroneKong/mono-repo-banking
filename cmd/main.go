@@ -65,6 +65,8 @@ func main() {
 	})
 	mux.HandleFunc("POST /api/login", handlers.HandleLogin)
 	mux.HandleFunc("GET /api/allTransactions", handlers.HandleGetAllTransactions)
+	mux.HandleFunc("POST /api/createTransaction", handlers.HandleCreateTransaction)
+	mux.HandleFunc("DELETE /api/deleteTransaction/{id}", handlers.HandleDeleteTransaction)
 
 	handler := corsMiddleware(mux)
 

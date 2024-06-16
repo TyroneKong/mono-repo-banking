@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gofiber/fiber/v3"
+	"gorm.io/gorm"
 )
 
 type Transaction struct {
@@ -21,6 +21,10 @@ type Transaction struct {
 	Currency   string  `gorm:"not null" json:"currency"`
 	Type       string  `gorm:"not null" json:"type"`
 	CreateDate string  `gorm:"autoCreateTime" json:"createdate"`
+}
+
+type ResponseMesage struct {
+	Message string `json:"message"`
 }
 
 func NewTransaction(data map[string]string, amount, balance float64) *models.Transaction {
@@ -41,57 +45,61 @@ func getBalance(data map[string]string, balance float64) error {
 	return nil
 }
 
-func HandleDeleteTransaction(c fiber.Ctx) error {
+func HandleDeleteTransaction(w http.ResponseWriter, r *http.Request) {
 
 	var transaction models.Transaction
 	// var data map[string]string
 
-	id, err := c.ParamsInt("id")
-
-	if err != nil {
-		return errors.New("please provide a valid id")
-	}
+	id := r.PathValue("id")
 
 	// if err := c.Bind().Body(&data); err != nil {
 	// 	return err
 	// }
 
 	if err := database.DB.Delete(&transaction, "ID = ?", id).Error; err != nil {
-		return errors.New("transaction not found")
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			http.Error(w, "id not found", http.StatusNotFound)
+		}
 	}
-
-	return nil
 
 }
 
-func HandleCreateTransaction(c fiber.Ctx) error {
+func HandleCreateTransaction(w http.ResponseWriter, r *http.Request) {
 	var balance float64
 	var user models.User
 	var data map[string]string
 
-	if err := c.Bind().Body(&data); err != nil {
-		return err
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
 	}
 
 	if err := database.DB.First(&user, "id = ?", data["userId"]).Error; err != nil {
-		return errors.New("User does not exist")
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			http.Error(w, "User does not exist", http.StatusNotFound)
+		} else {
+			http.Error(w, "internal server error", http.StatusInternalServerError)
+		}
+		return
 	}
 
 	if err := database.DB.Table("transactions").Where("user_Id = ?", data["userId"]).Group("user_Id").Pluck("SUM(amount)", &balance).Error; err != nil {
-		return errors.New("unable to retrieve balance")
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			http.Error(w, "balance not found", http.StatusNotFound)
+		}
 	}
 
 	amount, _ := strconv.ParseFloat(data["amount"], 64)
 
 	transaction := NewTransaction(data, amount, balance)
 
+	var response ResponseMesage
 	switch transaction.Type {
 
 	case "deposit":
 
-		if err := getBalance(data, balance); err != nil {
-			return errors.New("unable to retrieve balance")
-		}
+		// if err := getBalance(data, balance); err != nil {
+		// 	return errors.New("unable to retrieve balance")
+		// }
 		transaction.Balance = balance + transaction.Amount
 
 		log.Printf("user id: %v, name: %v, amount: %v", transaction.UserID, transaction.Name, transaction.Amount)
@@ -99,14 +107,14 @@ func HandleCreateTransaction(c fiber.Ctx) error {
 	case "withdrawal":
 
 		if transaction.Balance < transaction.Amount {
-			return c.JSON(fiber.Map{
-				"message": "not enough funds",
-			})
+			response = ResponseMesage{
+				Message: "not enough funds",
+			}
 		}
 
-		if err := getBalance(data, balance); err != nil {
-			return errors.New("unable to retrieve balance")
-		}
+		// if err := getBalance(data, balance); err != nil {
+		// 	return errors.New("unable to retrieve balance")
+		// }
 
 		transaction.Balance = balance - transaction.Amount
 		transaction.Amount = -transaction.Amount
@@ -116,7 +124,8 @@ func HandleCreateTransaction(c fiber.Ctx) error {
 	}
 
 	database.DB.Create(&transaction)
-	return c.JSON(transaction)
+	w.Header().Set("content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }
 
 func getAllTransactions() ([]Transaction, error) {
