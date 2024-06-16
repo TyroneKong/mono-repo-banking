@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	"finance/database"
 	"finance/models"
 	"log"
+	"net/http"
 	"strconv"
 
 	"github.com/gofiber/fiber/v3"
@@ -128,14 +130,18 @@ func getAllTransactions() ([]Transaction, error) {
 
 }
 
-func HandleGetAllTransactions(c fiber.Ctx) error {
+func HandleGetAllTransactions(w http.ResponseWriter, r *http.Request) {
 
 	transaction, err := getAllTransactions()
 
 	if err != nil {
-		return c.Status(404).JSON("No users available")
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
 	}
 
-	return c.Status(200).JSON(&transaction)
+	if err := json.NewEncoder(w).Encode(transaction); err != nil {
+		log.Printf("Error encoding response %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 
 }

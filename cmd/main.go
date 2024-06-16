@@ -64,6 +64,8 @@ func main() {
 		fmt.Fprintf(w, "testing post")
 	})
 	mux.HandleFunc("POST /api/login", handlers.HandleLogin)
+	mux.HandleFunc("GET /api/allTransactions", handlers.HandleGetAllTransactions)
+
 	handler := corsMiddleware(mux)
 
 	// setupRoutes(mux)
