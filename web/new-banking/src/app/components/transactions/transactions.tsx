@@ -62,33 +62,46 @@ function TransactionTable() {
   const columnHelper = createColumnHelper<Transaction>();
 
   const columns = [
-    // columnHelper.accessor('checkbox', {
-    //   cell: (info) => info.getValue(),
-    //   footer: (info) => info.column.id,
-    // }),
+    columnHelper.display({
+      id: 'selection',
+      header: () => (
+        <input
+          type='checkbox'
+          checked={tableInstance.getIsAllRowsSelected()}
+          onChange={tableInstance.getToggleAllRowsSelectedHandler()}
+        />
+      ),
+      cell: ({ row }) => (
+        <input
+          type='checkbox'
+          checked={row.getIsSelected()}
+          onChange={row.getToggleSelectedHandler()}
+        />
+      ),
+    }),
     columnHelper.accessor('ID', {
-      cell: (info) => info.getValue(),
-      footer: (info) => info.column.id,
+      id: 'ID',
+      header: 'ID',
     }),
     columnHelper.accessor('name', {
-      cell: (info) => info.getValue(),
-      footer: (info) => info.column.id,
+      id: 'name',
+      header: 'Name',
     }),
     columnHelper.accessor('amount', {
-      cell: (info) => info.getValue(),
-      footer: (info) => info.column.id,
+      id: 'amount',
+      header: 'Amount',
     }),
     columnHelper.accessor('balance', {
-      cell: (info) => info.getValue(),
-      footer: (info) => info.column.id,
+      id: 'balance',
+      header: 'Balance',
     }),
     columnHelper.accessor('createdate', {
-      cell: (info) => info.getValue(),
-      footer: (info) => info.column.id,
+      id: 'createdate',
+      header: 'CreateDate',
     }),
     columnHelper.accessor('currency', {
-      cell: (info) => info.getValue(),
-      footer: (info) => info.column.id,
+      id: 'currency',
+      header: 'Currency',
     }),
   ];
 
@@ -107,6 +120,8 @@ function TransactionTable() {
     //order doesn't matter anymore!
     // etc.
   });
+
+  // console.log({ selectedRows: tableInstance.getSelectedRowModel() });
 
   const rowData = () => data && tableInstance.getRowModel().rows;
 
@@ -164,9 +179,7 @@ function TransactionTable() {
           </label>
         );
       })}
-      <Checkbox
-        onCheckedChange={tableInstance.getToggleAllRowsSelectedHandler()}
-      />
+
       <Table className='w-full ml-4 border-collapse divide-y divide-gray-400 text-xs'>
         <TableCaption>Monzo</TableCaption>
 
@@ -203,25 +216,27 @@ function TransactionTable() {
 
         <TableBody>
           {row?.map((row) => (
-            <TableRow key={row.id}>
-              {/* <Checkbox
-                  onCheckedChange={row.getToggleSelectedHandler()}
-                  checked={row.getIsSelected()}
-                /> */}
-
-              {row.getVisibleCells().map((cell) => {
-                return (
-                  <td key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                );
-              })}
-              <Button
-                onClick={() => deleteTransaction.mutate(row.getValue('ID'))}
-              >
-                Delete
-              </Button>
-            </TableRow>
+            <React.Fragment key={row.id}>
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => {
+                  return (
+                    <td key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  );
+                })}
+                <td>
+                  <Button
+                    onClick={() => deleteTransaction.mutate(row.getValue('ID'))}
+                  >
+                    Delete
+                  </Button>
+                </td>
+              </TableRow>
+            </React.Fragment>
           ))}
           {/* {tableInstance?.getRowModel().rows.map((row) => (
             <tr key={row.id}>
