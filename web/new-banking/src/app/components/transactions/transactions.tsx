@@ -67,8 +67,8 @@ function TransactionTable() {
       header: () => (
         <input
           type='checkbox'
-          checked={tableInstance.getIsAllRowsSelected()}
-          onChange={tableInstance.getToggleAllRowsSelectedHandler()}
+          // checked={tableInstance.getIsAllRowsSelected()}
+          // onChange={tableInstance.getToggleAllRowsSelectedHandler()}
         />
       ),
       cell: ({ row }) => (
@@ -149,10 +149,6 @@ function TransactionTable() {
     }
   };
 
-  //   const columns2 = data?.map((t) => (t) => {
-  //     ({ key: t.ID, header: t, render: (t) => t });
-  //   });
-
   type myReadOnly<T, K extends keyof T> = { readonly [P in K]: T[P] };
   const queryClient = useQueryClient();
 
@@ -206,12 +202,6 @@ function TransactionTable() {
               ))}
             </TableRow>
           ))}
-
-          {/* <TableRow>
-            {columns?.map((col) => (
-              <TableHead key={col.header}>{col.header}</TableHead>
-            ))}            
-          </TableRow> */}
         </TableHeader>
 
         <TableBody>
@@ -238,42 +228,6 @@ function TransactionTable() {
               </TableRow>
             </React.Fragment>
           ))}
-          {/* {tableInstance?.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))} */}
-
-          {/* {data?.data.map((item) => {
-            const color = item.type === 'withdrawal' ? 'red' : 'green';
-            return (
-              <TableRow key={item.ID} style={{ color }}>
-                <td>
-                  <Checkbox
-                    onCheckedChange={() => toggleCheckItems(item)}
-                    id='terms'
-                    checked={allchecked}
-                  />
-                </td>
-
-                {columns.map((col) => (
-                  <TableCell key={col.header}>{col.render(item)}</TableCell>
-                ))}
-                <td>
-                  <Button
-                    style={{ color: 'red' }}
-                    onClick={() => deleteTransaction.mutate(item.ID as string)}
-                  >
-                    Remove
-                  </Button>
-                </td>
-              </TableRow>
-            );
-          })} */}
         </TableBody>
       </Table>
       <TransactionDrawer />
