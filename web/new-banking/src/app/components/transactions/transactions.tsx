@@ -69,7 +69,8 @@ import {
 import { SlidersHorizontal } from 'lucide-react';
 import { format, isWithinInterval } from 'date-fns';
 
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm, useWatch } from 'react-hook-form';
+import { object } from 'zod';
 
 type TableColumn<T> = {
   key: keyof T;
@@ -103,7 +104,17 @@ function SelectComponet({
 
   const { data, isLoading } = useGetTransactions();
 
-  const resetFilters = () => clearFilters();
+  const resetFields = () => {
+    form.setValue('name', '');
+    form.setValue('startDate', '');
+    form.setValue('endDate', '');
+  };
+  const resetFilters = () => {
+    resetFields();
+    form.reset();
+
+    clearFilters();
+  };
 
   const form = useForm<{ name: string; startDate: string; endDate: string }>({
     defaultValues: {
@@ -125,18 +136,32 @@ function SelectComponet({
     return filterDate;
   };
 
-  const onSubmitHandler: SubmitHandler<{
+  type FieldTypes = {
     name: string;
     startDate: string;
     endDate: string;
-  }> = (data) => {
+  };
+
+  const onSubmitHandler: SubmitHandler<FieldTypes> = (data) => {
     const matchedDates = filterDates(data.startDate, data.endDate)?.map(
       (x) => x.createdate
     );
     console.log('matched dates', matchedDates);
-    if (form.formState.isDirty && matchedDates)
+
+    // columnFilter('name', data.name);
+    console.log(' start date dirty', form.formState.dirtyFields.startDate);
+    console.log('end date', form.formState.dirtyFields.endDate);
+    if (form.formState.dirtyFields.name) {
+      columnFilter('name', data.name);
+    }
+    if (
+      form.formState.dirtyFields.startDate &&
+      form.formState.dirtyFields.endDate &&
+      matchedDates
+    ) {
       columnFilter('createdate', matchedDates);
-    columnFilter('name', data.name);
+    }
+
     setOpen(false);
   };
 
