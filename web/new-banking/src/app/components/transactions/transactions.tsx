@@ -1,41 +1,16 @@
 'use client';
 
-import React, { ReactNode, useMemo, useState } from 'react';
+import React, { SetStateAction, useState } from 'react';
 import {
   Table,
   TableBody,
   TableCaption,
-  TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Checkbox } from '@/components/ui/checkbox';
-
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
 
 import TransactionDrawer from './transaction-drawer';
-import Transaction from '@/types/transactions';
+
 import {
   axAPI,
   transactionKeys,
@@ -48,46 +23,23 @@ import {
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  createColumnHelper,
   flexRender,
   SortingState,
   getFilteredRowModel,
   ColumnDef,
   ColumnFiltersState,
-  Row,
 } from '@tanstack/react-table';
 
-import { create } from 'zustand';
-import Search from './search';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { SlidersHorizontal } from 'lucide-react';
-import { format, isWithinInterval } from 'date-fns';
+import Search from './atoms/search';
 
-import { SubmitHandler, useForm, useWatch } from 'react-hook-form';
-import { object } from 'zod';
+import { isWithinInterval } from 'date-fns';
 
-type TableColumn<T> = {
-  key: keyof T;
-  header: keyof T;
-  render: (item: T) => ReactNode;
-};
-
-// customer filter function which gets set on the filterfn column prop and returns true if match found
-const dateRangeFilter = (
-  row: Row<Transaction>,
-  columnId: string,
-  filterValue: string[]
-) => {
-  const rowValue = row.getValue(columnId);
-
-  return !!filterValue.find((x) => x === rowValue);
-};
+import { SubmitHandler, useForm } from 'react-hook-form';
+import UseTransactionColumns from './atoms/columns';
+import FormSelect from '../../../ui/atoms/form-select';
+import FormInput from '@/ui/atoms/form-input';
+import Transaction from '@/types/transactions';
+import FormFilter from '@/ui/atoms/form-filter';
 
 type SelectComponentProps = {
   columnFilter: (id: string, value: string | string[]) => void;
@@ -146,11 +98,7 @@ function SelectComponet({
     const matchedDates = filterDates(data.startDate, data.endDate)?.map(
       (x) => x.createdate
     );
-    console.log('matched dates', matchedDates);
 
-    // columnFilter('name', data.name);
-    console.log(' start date dirty', form.formState.dirtyFields.startDate);
-    console.log('end date', form.formState.dirtyFields.endDate);
     if (form.formState.dirtyFields.name) {
       columnFilter('name', data.name);
     }
@@ -165,131 +113,48 @@ function SelectComponet({
     setOpen(false);
   };
 
-  const types = Array.from(new Set(data?.map((x) => x.name)));
+  const types = Array.from(new Set(data?.map((x) => x.name))).map((name) => ({
+    name: name,
+    value: name,
+  }));
 
   return (
-    <>
-      <DropdownMenu open={open} onOpenChange={setOpen}>
-        <DropdownMenuTrigger asChild onClick={() => setOpen(true)}>
-          <Button variant='secondary' className='w-24 mt-2'>
-            <SlidersHorizontal className='w-4 h-4' />
-            Filters
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className='w-full'>
-          <DropdownMenuLabel>Columns</DropdownMenuLabel>
-
-          <DropdownMenuSeparator />
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmitHandler)}>
-              <FormField
-                control={form.control}
-                name='name'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <div className='w-full'>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder='choose type' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>choose name</SelectLabel>
-                              {types?.map((type) => (
-                                <SelectItem key={type} value={type}>
-                                  {type}
-                                </SelectItem>
-                              ))}
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <DropdownMenuSeparator />
-
-              <div className=' inline-flex gap-2'>
-                <div className='flex flex-col '>
-                  <Label className='mb-4' htmlFor='from'>
-                    Date Range Start
-                  </Label>
-                  <FormField
-                    control={form.control}
-                    name='startDate'
-                    render={({ field }) => (
-                      <Input
-                        className='w-48 h-12 px-4 py-3 rounded justify-center items-center gap-2 inline-flex'
-                        {...field}
-                        id='from'
-                        type='date'
-                      />
-                    )}
-                  />
-                </div>
-                <div className='flex flex-col '>
-                  <Label className='mb-4' htmlFor='to'>
-                    Date Range End
-                  </Label>
-                  <FormField
-                    control={form.control}
-                    name='endDate'
-                    render={({ field }) => (
-                      <Input
-                        className='w-48 h-12 px-4 py-3 rounded justify-center items-center gap-2 inline-flex'
-                        {...field}
-                        id='to'
-                        type='date'
-                      />
-                    )}
-                  />
-                </div>
-              </div>
-
-              <div className='flex gap-2 mt-10'>
-                <Button className='w-48' type='button' onClick={resetFilters}>
-                  Clear Filters
-                </Button>
-                <Button type='submit' className='w-48'>
-                  Apply Filters
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </>
+    <FormFilter
+      form={form}
+      onSubmit={onSubmitHandler}
+      resetFilters={resetFilters}
+    >
+      <div className='flex flex-col gap-4'>
+        <FormSelect label='name' types={types} />
+        <div className=' flex space-x-2'>
+          <div className='flex flex-col '>
+            <FormInput label='Date Range Start' name='startDate' type='date' />
+          </div>
+          <div className='flex flex-col '>
+            <FormInput label='Date Range End' name='endDate' type='date' />
+          </div>
+        </div>
+      </div>
+    </FormFilter>
   );
 }
 
-export function SelectSingleCheckbox({ row }) {
-  return (
-    <input
-      type='checkbox'
-      checked={row.getIsSelected()}
-      onChange={row.getToggleSelectedHandler()}
-    />
-  );
-}
+type PaginationType = {
+  pageIndex: number;
+  pageSize: number;
+};
 
-export function SelectAllCheckbox({ tableInstance }) {
-  return (
-    <input
-      type='checkbox'
-      checked={tableInstance.getIsAllRowsSelected()}
-      onChange={tableInstance.getToggleAllRowsSelectedHandler()}
-    />
-  );
-}
+type TableType<TData> = {
+  data: TData;
+  columns: ColumnDef<TData, any>[];
+  pagination: PaginationType;
+  setPagination: React.Dispatch<SetStateAction<PaginationType>>;
+  sorting: SortingState;
+  setSorting: React.Dispatch<SetStateAction<SortingState>>;
+  isManualPagination: boolean;
+  pageSize: number;
+  isLoading: boolean;
+};
 
 function TransactionTable() {
   const { data, isLoading } = useGetTransactions();
@@ -298,47 +163,13 @@ function TransactionTable() {
   const [allchecked, setAllChecked] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
 
-  const columnHelper = createColumnHelper<Transaction>();
   const [filtering, setFiltering] = useState('');
-
-  const columns = useMemo<ColumnDef<Transaction, any>[]>(
-    () => [
-      columnHelper.display({
-        id: 'selection',
-        header: () => <SelectAllCheckbox tableInstance={tableInstance} />,
-        cell: ({ row }) => <SelectSingleCheckbox row={row} />,
-      }),
-      columnHelper.accessor('ID', {
-        id: 'ID',
-        header: 'ID',
-      }),
-      columnHelper.accessor('name', {
-        id: 'name',
-        header: 'Name',
-      }),
-      columnHelper.accessor('amount', {
-        id: 'amount',
-        header: 'Amount',
-      }),
-      columnHelper.accessor('balance', {
-        id: 'balance',
-        header: 'Balance',
-      }),
-      columnHelper.accessor('createdate', {
-        id: 'createdate',
-        header: 'CreateDate',
-        size: 1,
-        filterFn: dateRangeFilter,
-      }),
-      columnHelper.accessor('currency', {
-        id: 'currency',
-        header: 'Currency',
-        size: 8,
-      }),
-    ],
-    []
-  );
+  const columns = UseTransactionColumns();
 
   const tableInstance = useReactTable({
     columns,
@@ -347,17 +178,17 @@ function TransactionTable() {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    manualPagination: true,
+    // manualPagination: true,
     state: {
       sorting,
       globalFilter: filtering,
       columnFilters,
+      pagination: pagination,
     },
     onSortingChange: setSorting,
     onGlobalFilterChange: setFiltering,
     onColumnFiltersChange: setColumnFilters,
-    //order doesn't matter anymore!
-    // etc.
+    onPaginationChange: setPagination,
   });
 
   // console.log({ selectedRows: tableInstance.getSelectedRowModel() });
@@ -365,28 +196,6 @@ function TransactionTable() {
   const rowData = () => data && tableInstance.getRowModel().rows;
 
   const row = rowData();
-
-  const toggleCheckItems = (item: Transaction) => {
-    if (checkedItems.some((x) => x.ID === item.ID)) {
-      setCheckItems(checkedItems.filter((x) => x.ID !== item.ID));
-    } else {
-      setCheckItems([...checkedItems, item]);
-    }
-  };
-
-  const handleFilterItem = (item: Transaction) => {
-    setCheckItems(checkedItems.filter((x) => x.ID === item.ID));
-  };
-
-  const handleCheckAllItems = () => {
-    if (!allchecked) {
-      setAllChecked(true);
-      setCheckItems(data || []);
-    } else {
-      setAllChecked(false);
-      setCheckItems([]);
-    }
-  };
 
   const filterColumnById = (id: string, value: string | string[]) => {
     const type = tableInstance.getAllColumns().filter((x) => x.id === id)[0];
@@ -403,7 +212,7 @@ function TransactionTable() {
     },
   });
 
-  if (data === undefined) {
+  if (isLoading) {
     return <div>...loading</div>;
   }
 
@@ -416,11 +225,8 @@ function TransactionTable() {
       />
       <header className='text-center text-2xl font-bold'>Monzo</header>
       <Search filter={filtering} setFilter={setFiltering} />
-      <Button onClick={() => tableInstance.resetColumnFilters()}>
-        reset column filters
-      </Button>
 
-      {tableInstance.getAllColumns().map((column) => {
+      {tableInstance.getAllColumns()?.map((column) => {
         return (
           <label key={column.id}>
             {column.id}
@@ -433,12 +239,34 @@ function TransactionTable() {
           </label>
         );
       })}
+      <div className='flex space-x-4 justify-end'>
+        <Button variant='default' onClick={() => tableInstance.setPageIndex(0)}>
+          first
+        </Button>
+        <Button
+          disabled={!tableInstance.getCanPreviousPage()}
+          variant='default'
+          onClick={() => tableInstance.previousPage()}
+        >
+          previous
+        </Button>
+        <Button
+          disabled={!tableInstance.getCanNextPage()}
+          variant='default'
+          onClick={() => tableInstance.nextPage()}
+        >
+          Next
+        </Button>
+        <Button onClick={() => tableInstance.lastPage()} variant='default'>
+          Last
+        </Button>
+      </div>
 
       <Table className='w-full ml-4 border-collapse divide-y divide-gray-400 text-xs'>
         <TableCaption>Monzo</TableCaption>
 
         <TableHeader>
-          {tableInstance.getHeaderGroups().map((headerGroup) => (
+          {tableInstance?.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <th

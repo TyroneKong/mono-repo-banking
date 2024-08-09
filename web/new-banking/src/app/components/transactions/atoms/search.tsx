@@ -9,6 +9,7 @@ type SearchProps = {
 function Search({ filter, setFilter }: SearchProps) {
   return (
     <input
+      className='w-40 h-8'
       value={filter}
       onChange={(e) => setFilter(e.target.value)}
       placeholder='search..'
