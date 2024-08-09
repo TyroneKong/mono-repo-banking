@@ -1,7 +1,9 @@
 'use client';
 
 import UseTransactionColumns from '@/app/components/transactions/atoms/columns';
+import Search from '@/app/components/transactions/atoms/search';
 import TransactionDrawer from '@/app/components/transactions/transaction-drawer';
+import SelectComponet from '@/app/components/transactions/transactions';
 import {
   axAPI,
   transactionKeys,
@@ -106,6 +108,13 @@ const Datatable = () => {
 
   return (
     <div className='flex flex-col '>
+      <SelectComponet
+        columnFilter={filterColumnById}
+        id='type'
+        clearFilters={tableInstance.resetColumnFilters}
+      />
+      <header className='text-center text-2xl font-bold'>Monzo</header>
+      <Search filter={filtering} setFilter={setFiltering} />
       {tableInstance.getAllColumns()?.map((column) => {
         return (
           <label key={column.id}>

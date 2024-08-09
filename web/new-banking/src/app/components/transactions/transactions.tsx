@@ -110,3 +110,5 @@ function SelectComponet({
     </FormFilter>
   );
 }
+
+export default SelectComponet;
