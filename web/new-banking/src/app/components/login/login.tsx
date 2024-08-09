@@ -6,24 +6,8 @@ import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import {
-  Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/components/ui/card';
+
+import { Card } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import Image from 'next/image';
 import { axAPI } from '@/app/hooks/requests';
