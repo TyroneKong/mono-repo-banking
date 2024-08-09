@@ -251,7 +251,7 @@ function TransactionTable() {
           previous
         </Button>
         <Button
-          disabled={!tableInstance.getCanNextPage()}
+          disabled={!tableInstance?.getCanNextPage()}
           variant='default'
           onClick={() => tableInstance.nextPage()}
         >

@@ -1,0 +1,32 @@
+{
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
+  
+    "workbench.colorCustomizations": {
+      "editor.background": "#313445",
+      "editorWidget.background": "#1f2738bb",
+      "editorHoverWidget.background": "#2d3750",
+      "sideBar.background": "#313445",
+      "terminal.background": "#313445",
+      "editorLineNumber.activeForeground": "#586374",
+      "editorLineNumber.dimmedForeground": "#586374",
+      "editorLineNumber.foreground": "#58637466",
+      "scrollbarSlider.activeBackground": "#6b6f87",
+      "scrollbarSlider.hoverBackground": "#6b6f87",
+      "sideBar.border": "#63697355"
+    },
+  
+    "apc.electron": {
+      "backgroundColor": "#2A2E3D",
+      "frame": true,
+      "transparent": true,
+      "titleBarStyle": "hiddenInset",
+      "vibrancy": "ultra-dark",
+      "trafficLightPosition": {
+        "x": 15,
+        "y": 13
+      }
+    },
+    "apc.stylesheet": {
+      "*": "font-family:Dark Mono, monospace"
+    }
+  }
