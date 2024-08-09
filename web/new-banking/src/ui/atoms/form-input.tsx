@@ -21,7 +21,7 @@ const FormInput = ({ label, type, name }: FormInputProps) => {
         name={name}
         render={({ field }) => (
           <Input
-            className='w-48 h-12 px-4 py-3 rounded justify-center items-center gap-2 inline-flex'
+            className='h-12 px-4 py-3 rounded justify-center items-center gap-2 inline-flex'
             {...field}
             id='to'
             type={type}

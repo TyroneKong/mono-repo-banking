@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
@@ -27,6 +27,7 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import Image from 'next/image';
 import { axAPI } from '@/app/hooks/requests';
+import FormInput from '@/ui/atoms/form-input';
 
 const formSchema = z
   .object({
@@ -118,53 +119,18 @@ export function LoginForm() {
       <Card className='mb-5'>
         <Image src='/piggybank.jpg' alt='piggybank' width={400} height={400} />
       </Card>
-      <Form {...form}>
+      <FormProvider {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-          <FormField
-            control={form.control}
-            name='email'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className='text-2'>Email</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormDescription></FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='password'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className='text-2'>Password</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormDescription></FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
+          <FormInput label='email' name='email' type='text' />
+          <FormInput label='passwod' name='password' type='text' />
+          <FormInput
+            label='confirm password'
             name='confirmPassword'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className='text-2'>Confirm Password</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormDescription></FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+            type='text'
           />
           <Button type='submit'>Submit</Button>
         </form>
-      </Form>
+      </FormProvider>
     </div>
   );
 }
