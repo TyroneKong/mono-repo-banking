@@ -25,14 +25,15 @@ type OptionType = {
 type FormSelectProps = {
   label: string;
   types: OptionType[];
+  name: string;
 };
 
-const FormSelect = ({ label, types }: FormSelectProps) => {
+const FormSelect = ({ label, types, name }: FormSelectProps) => {
   const { control } = useFormContext();
   return (
     <FormField
       control={control}
-      name='name'
+      name={name}
       render={({ field }) => (
         <FormItem>
           <FormLabel>{label}</FormLabel>

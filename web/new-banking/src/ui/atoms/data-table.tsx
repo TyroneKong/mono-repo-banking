@@ -28,8 +28,12 @@ import {
   getSortedRowModel,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from '@tanstack/react-table';
 import React, { SetStateAction, useState } from 'react';
+import FormSelect from './form-select';
+import { useForm } from 'react-hook-form';
+import FormFilter from './form-filter';
 
 type PaginationType = {
   pageIndex: number;
@@ -53,11 +57,16 @@ const Datatable = () => {
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState();
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
-
+  const form = useForm({
+    defaultValues: {
+      preset: '',
+    },
+  });
   const [filtering, setFiltering] = useState('');
   const columns = UseTransactionColumns();
 
@@ -106,6 +115,19 @@ const Datatable = () => {
     return <div>...loading</div>;
   }
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+
+  const presets = [
+    {
+      name: 'balance',
+      value: 'true',
+    },
+  ];
+
+  const onSubmitHandler = (data) => {
+    console.log(data);
+  };
+
   return (
     <div className='flex flex-col '>
       <SelectComponet
@@ -115,6 +137,10 @@ const Datatable = () => {
       />
       <header className='text-center text-2xl font-bold'>Monzo</header>
       <Search filter={filtering} setFilter={setFiltering} />
+      <FormFilter form={form} onSubmit={onSubmitHandler}>
+        <FormSelect label='default presets' name='preset' types={presets} />
+      </FormFilter>
+
       {tableInstance.getAllColumns()?.map((column) => {
         return (
           <label key={column.id}>

@@ -97,7 +97,7 @@ function SelectComponet({
       resetFilters={resetFilters}
     >
       <div className='flex flex-col gap-4'>
-        <FormSelect label='name' types={types} />
+        <FormSelect label='name' name='name' types={types} />
         <div className=' flex space-x-2'>
           <div className='flex flex-col '>
             <FormInput label='Date Range Start' name='startDate' type='date' />
