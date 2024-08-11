@@ -1,19 +1,12 @@
-import axios from 'axios';
+import {
+  getAllExpenses,
+  getAllTransactions,
+  getCurrentUser,
+} from '@/infrastructure/api';
 import { useQuery, queryOptions } from '@tanstack/react-query';
-
-export const axAPI = axios.create({
-  baseURL: 'http://localhost:8080',
-  withCredentials: true,
-});
 
 export const transactionKeys = {
   all: ['transactions'],
-};
-
-const getAllTransactions = async () => {
-  const response = await axAPI.get('/api/allTransactions');
-
-  return response.data;
 };
 
 const Transactions = {
@@ -27,12 +20,6 @@ const Transactions = {
 
 export const useGetTransactions = () => {
   return useQuery(Transactions.list());
-};
-
-export const getAllExpenses = async () => {
-  const response = await axAPI.get('/api/allexpenses');
-
-  return response.data;
 };
 
 const Expenses = {
@@ -50,11 +37,6 @@ export const useGetExpenses = () => {
 
 const currentUserKeys = {
   current: ['me'],
-};
-
-const getCurrentUser = async () => {
-  const response = await axAPI.get('/api/currentUser');
-  return response.data;
 };
 
 export const useQueryCurrentUser = () => {
